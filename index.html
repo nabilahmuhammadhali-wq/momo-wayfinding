@@ -43,12 +43,46 @@
     }
 
     .frame[data-view="loading"] .loading-screen,
-    .frame[data-view="intro"] .intro,
     .frame[data-view="routes"] .routes,
     .frame[data-view="short-intro"] .short-intro,
+    .frame[data-view="garden-intro"] .garden-intro,
     .frame[data-view="completion"] .completion-screen,
     .frame[data-view="story"] .story {
       display: block;
+    }
+
+    .garden-intro-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      height: 100%;
+    }
+    .garden-intro-art {
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top right, #c8f4ff 0 30%, #e9faff 31%);
+    }
+    .garden-intro-art img { width: 68%; max-height: 84cqh; object-fit: contain; }
+    .garden-intro-copy {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 5cqw;
+      color: #111;
+    }
+    .garden-intro-copy h1 { margin: 0; font-size: clamp(18px, 4cqw, 46px); line-height: 1.15; }
+    .garden-intro-copy p { margin: 1.5cqw 0; font-size: clamp(12px, 2.2cqw, 23px); color: #475467; }
+    .garden-intro-copy .garden-intro-label { color: #062679; font-weight: 700; text-transform: uppercase; }
+    .garden-intro-start {
+      align-self: flex-start;
+      margin-top: 1cqw;
+      padding: .65em 1em;
+      border: 2px solid #062679;
+      border-radius: 12px;
+      background: #00c9ff;
+      color: #111;
+      font-size: clamp(12px, 2cqw, 22px);
+      font-weight: 700;
+      cursor: pointer;
     }
 
     .loading-screen {
@@ -302,6 +336,27 @@
       -webkit-user-drag: none;
     }
 
+    /* Reposition the caption embedded in the pathway slide. */
+    .frame[data-route="garden"][data-story-page="18"] .story::before,
+    .frame[data-route="garden"][data-story-page="18"] .story::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: url("assets/garden-18-clean.png") top center / 100% 100% no-repeat;
+      pointer-events: none;
+    }
+
+    .frame[data-route="garden"][data-story-page="18"] .story::before {
+      clip-path: inset(3.55% 12.65% 72.25% 42.5% round 3cqw);
+      background-position: center -24.25cqh;
+    }
+
+    .frame[data-route="garden"][data-story-page="18"] .story::after {
+      clip-path: inset(3.55% 12.65% 72.25% 42.5% round 3cqw);
+      transform: translate(2%, 56%);
+    }
+
     .hit {
       position: absolute;
       z-index: 5;
@@ -323,13 +378,6 @@
     .hit:disabled { cursor: default; }
     .nav-icon { display: block; width: 58%; height: 58%; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
     .home-icon { fill: currentColor; stroke: none; }
-
-    .intro-start {
-      left: 50.5%;
-      top: 64%;
-      width: 24.5%;
-      height: 13%;
-    }
 
     .route-garden,
     .route-shortest {
@@ -370,28 +418,6 @@
 
     .story-momo-wrap[data-overlay="false"] { display: none; }
     .story-momo-wrap[data-fit="target"] .story-shadow { display: none; }
-
-    .instruction-override {
-      position: absolute;
-      z-index: 1;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      left: 6.87%;
-      top: 12.5%;
-      right: 24%;
-      height: 18.2%;
-      padding: 0 .95cqw;
-      border: .6cqw solid #00c9ff;
-      border-radius: 2.96cqw;
-      background: #00ffc9;
-      color: #030303;
-      font-size: 2.6cqw;
-      line-height: 1.2;
-      text-align: center;
-    }
-
-    .frame[data-story-page="-2"] .instruction-override { display: flex; }
 
     .story-momo {
       position: relative;
@@ -552,43 +578,28 @@
       position: absolute;
       z-index: 4;
       top: 4.2%;
-      left: 4.5%;
-      width: 44%;
+      left: 19%;
+      width: 62%;
       height: 3.2%;
       min-height: 5px;
-      display: flex;
-      gap: 4px;
-      overflow: visible;
+      padding: 2px;
+      overflow: hidden;
+      border: 1px solid #ffffffb8;
+      border-radius: 999px;
+      background: #10233355;
+      box-shadow: 0 1px 5px #10233335;
       pointer-events: none;
     }
 
-    .route-progress[data-placement="bottom"] {
-      top: auto;
-      right: 19%;
-      bottom: 4.2%;
-      left: 19%;
-      width: 62%;
-    }
-
-    .route-progress-segment {
+    .route-progress-fill {
       display: block;
-      flex: 1 1 0;
-      min-width: 0;
+      width: 0;
       height: 100%;
       border-radius: 999px;
-      border: 1px solid #ffffffb8;
-      background: #10233370;
-      box-shadow: 0 1px 4px #10233330;
-      transition: background .25s ease, box-shadow .25s ease;
-    }
-
-    .route-progress-segment[data-state="complete"],
-    .route-progress-segment[data-state="active"] {
       background: linear-gradient(90deg, #00c9ff, #00ffff);
-      border-color: #ffffffd4;
+      box-shadow: 0 0 7px #00ffff99;
+      transition: width .45s cubic-bezier(.2, .75, .25, 1);
     }
-
-    .route-progress-segment[data-state="active"] { box-shadow: 0 0 7px #00ffff99; }
 
     .success {
       position: absolute;
@@ -760,11 +771,6 @@
       </div>
     </section>
 
-    <section class="entry intro" aria-label="Meet MOMO">
-      <img class="entry-art" src="assets/source-home.png" alt="Hi, I’m Momo! I will be your guide for today.">
-      <button class="hit intro-start" id="introStart" type="button" aria-label="Let’s start"></button>
-    </section>
-
     <section class="entry routes" aria-label="Route selection">
       <img class="entry-art" src="assets/source-routes.png" alt="What would you like to explore today?">
       <button class="hit route-garden" id="gardenRoute" type="button" aria-label="Garden Route"></button>
@@ -775,6 +781,20 @@
       <img class="entry-art" src="assets/short-intro.png" alt="Fewer steps, shortest trip. The fastest way to get there!">
       <button class="hit short-start" id="shortStart" type="button" aria-label="Start the Shortest Route"></button>
       <button class="hit short-intro-home" id="shortIntroHome" type="button" aria-label="Return to route selection"></button>
+    </section>
+
+    <section class="entry garden-intro" aria-labelledby="gardenIntroTitle">
+      <div class="garden-intro-layout">
+        <div class="garden-intro-art">
+          <img src="assets/momo-page25-figma.png" alt="Momo smiling with eyes closed and holding a flower">
+        </div>
+        <div class="garden-intro-copy">
+          <p class="garden-intro-label">Garden Route</p>
+          <h1 id="gardenIntroTitle">Lesser people, calmer route.</h1>
+          <p>Let’s take a walk through the garden</p>
+          <button class="garden-intro-start" id="gardenStart" type="button">Let’s Start! <span aria-hidden="true">→</span></button>
+        </div>
+      </div>
     </section>
 
     <section class="entry completion-screen" aria-label="Route complete">
@@ -793,14 +813,11 @@
 
     <section class="story" id="story" aria-label="Wayfinding story">
       <img class="slide" id="slide" src="assets/garden--2-clean.png" alt="Wayfinding social story slide">
-      <div class="instruction-override" aria-label="From the star, walk to the escalator">
-        <span>From the <strong>star</strong>, <strong>walk</strong> to the <strong>escalator</strong></span>
-      </div>
       <div class="story-momo-wrap" id="momoWrap" data-overlay="true">
         <span class="story-shadow"></span>
         <img class="story-momo" id="momo" src="assets/momo-original.png" alt="" aria-hidden="true">
       </div>
-      <div class="route-progress" id="routeProgress" role="progressbar" aria-label="Garden Route progress" aria-valuemin="1" aria-valuemax="21" aria-valuenow="1" aria-valuetext="Step 1 of 21"></div>
+      <div class="route-progress" id="routeProgress" role="progressbar" aria-label="Garden Route progress" aria-valuemin="1" aria-valuemax="21" aria-valuenow="1" aria-valuetext="Step 1 of 21"><span class="route-progress-fill" id="routeProgressFill"></span></div>
       <span class="success" id="success" aria-hidden="true">✓</span>
       <button class="hit home" id="home" type="button" aria-label="Return to route selection"><svg class="nav-icon home-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.7 1.7 10.9l1.2 1.5L5 10.7V21h5.3v-6h3.4v6H19V10.7l2.1 1.7 1.2-1.5L12 2.7Z"/></svg></button>
       <button class="hit back" id="back" type="button" aria-label="Previous story step"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg></button>
@@ -893,7 +910,7 @@
     const status = document.querySelector("#status");
     const completionMessage = document.querySelector("#completionMessage");
     const progress = document.querySelector("#routeProgress");
-    let progressSegments = [];
+    const progressFill = document.querySelector("#routeProgressFill");
     const backButton = document.querySelector("#back");
     const nextButton = document.querySelector("#next");
 
@@ -910,12 +927,6 @@
 
     function activeSteps() {
       return route === "garden" ? gardenSteps : shortestSteps;
-    }
-
-    function showIntro() {
-      frame.dataset.view = "intro";
-      frame.dataset.motion = "idle";
-      status.textContent = "Meet MOMO";
     }
 
     function showRoutes() {
@@ -940,6 +951,13 @@
       frame.dataset.view = "short-intro";
       frame.dataset.motion = "idle";
       status.textContent = "Shortest Route introduction";
+    }
+
+    function showGardenIntro() {
+      frame.dataset.view = "garden-intro";
+      frame.dataset.motion = "idle";
+      status.textContent = "Garden Route introduction";
+      document.querySelector("#gardenStart").focus({ preventScroll: true });
     }
 
     function openStory(selectedRoute) {
@@ -1000,21 +1018,7 @@
       progress.setAttribute("aria-valuemax", String(steps.length));
       progress.setAttribute("aria-valuenow", String(stepNumber));
       progress.setAttribute("aria-valuetext", `Step ${stepNumber} of ${steps.length}`);
-      progress.dataset.placement = isGarden && step.page === "22" ? "bottom" : "top";
-      if (progressSegments.length !== steps.length) {
-        const fragment = document.createDocumentFragment();
-        progressSegments = Array.from({ length: steps.length }, () => {
-          const segment = document.createElement("span");
-          segment.className = "route-progress-segment";
-          segment.setAttribute("aria-hidden", "true");
-          fragment.append(segment);
-          return segment;
-        });
-        progress.replaceChildren(fragment);
-      }
-      progressSegments.forEach((segment, segmentIndex) => {
-        segment.dataset.state = segmentIndex === index ? "active" : segmentIndex < index ? "complete" : "inactive";
-      });
+      progressFill.style.width = `${(stepNumber / steps.length) * 100}%`;
       success.dataset.on = String(Boolean(isGarden && step.requiresTap && tapped));
       backButton.disabled = index === 0;
       nextButton.disabled = busy || Boolean(isGarden && step.requiresTap && !tapped);
@@ -1079,8 +1083,8 @@
       status.textContent = "Card tap complete";
     }
 
-    document.querySelector("#introStart").addEventListener("click", showRoutes);
-    document.querySelector("#gardenRoute").addEventListener("click", () => openStory("garden"));
+    document.querySelector("#gardenRoute").addEventListener("click", showGardenIntro);
+    document.querySelector("#gardenStart").addEventListener("click", () => openStory("garden"));
     document.querySelector("#shortestRoute").addEventListener("click", showShortestIntro);
     document.querySelector("#shortStart").addEventListener("click", () => openStory("shortest"));
     document.querySelector("#shortIntroHome").addEventListener("click", showRoutes);
@@ -1094,13 +1098,12 @@
         if (event.key === "ArrowRight") nextStep();
         if (event.key === "ArrowLeft") previousStep();
         if (event.key === "Escape") showRoutes();
-      } else if (event.key === "Escape" && frame.dataset.view === "short-intro") {
+      } else if (event.key === "Escape" && (frame.dataset.view === "short-intro" || frame.dataset.view === "garden-intro")) {
         showRoutes();
       }
     });
 
     window.__wayfinding = {
-      showIntro,
       showRoutes,
       showShortestIntro,
       openStory,
@@ -1120,7 +1123,11 @@
     };
 
     window.__gardenRoute = window.__wayfinding;
-    window.setTimeout(showIntro, 2200);
+    if (new URLSearchParams(window.location.search).get("route") === "garden") {
+      showGardenIntro();
+    } else {
+      window.setTimeout(showRoutes, 2200);
+    }
   </script>
 </body>
 </html>
