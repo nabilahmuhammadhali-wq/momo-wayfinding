@@ -554,7 +554,7 @@
     .route-progress {
       position: absolute;
       z-index: 4;
-      top: calc(min(50vh, 23.105vw) - 50vh + 8px);
+      top: calc(min(50vh, 23.105vw) - 50vh + max(12px, env(safe-area-inset-top)));
       left: 19%;
       width: 62%;
       height: 3.2%;
