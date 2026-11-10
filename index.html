@@ -1,0 +1,1092 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#111111">
+  <title>Wayfinding · MOMO Social Story</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #111;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    button { font: inherit; }
+
+    .frame {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: min(100vw, 216.41vh);
+      height: min(100vh, 46.21vw);
+      aspect-ratio: 844 / 390;
+      overflow: hidden;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      isolation: isolate;
+      container-type: size;
+    }
+
+    .entry,
+    .story {
+      position: absolute;
+      inset: 0;
+      display: none;
+      overflow: hidden;
+    }
+
+    .frame[data-view="loading"] .loading-screen,
+    .frame[data-view="intro"] .intro,
+    .frame[data-view="routes"] .routes,
+    .frame[data-view="short-intro"] .short-intro,
+    .frame[data-view="completion"] .completion-screen,
+    .frame[data-view="story"] .story {
+      display: block;
+    }
+
+    .loading-screen {
+      background:
+        radial-gradient(circle at 17% 14%, #00ffc933 0 10%, transparent 10.5%),
+        radial-gradient(circle at 88% 82%, #ffd5003d 0 13%, transparent 13.5%),
+        linear-gradient(135deg, #f7ffff 0%, #e9fbff 58%, #dff9f3 100%);
+    }
+
+    .loading-screen::before,
+    .loading-screen::after {
+      content: "";
+      position: absolute;
+      border: 2px solid #00c9ff26;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .loading-screen::before {
+      width: 28%;
+      aspect-ratio: 1;
+      left: -9%;
+      bottom: -31%;
+      box-shadow: 0 0 0 18px #00c9ff0d, 0 0 0 42px #00c9ff08;
+    }
+
+    .loading-screen::after {
+      width: 19%;
+      aspect-ratio: 1;
+      right: -5%;
+      top: -23%;
+      box-shadow: 0 0 0 16px #ffd50012;
+    }
+
+    .loading-layout {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8%;
+      padding: max(5%, env(safe-area-inset-top)) max(7%, env(safe-area-inset-right)) max(5%, env(safe-area-inset-bottom)) max(7%, env(safe-area-inset-left));
+    }
+
+    .loading-character {
+      position: relative;
+      width: 28%;
+      height: 82%;
+      flex: 0 0 auto;
+    }
+
+    .loading-momo {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center bottom;
+      transform-origin: 50% 100%;
+      animation: grounded-walk .8s ease-in-out infinite;
+      filter: drop-shadow(0 3px 2px #0626791f);
+    }
+
+    .loading-shadow {
+      position: absolute;
+      z-index: 0;
+      left: 27%;
+      bottom: 3%;
+      width: 46%;
+      height: 6%;
+      border-radius: 50%;
+      background: #0626792b;
+      filter: blur(2px);
+      animation: walk-shadow .8s ease-in-out infinite;
+    }
+
+    .loading-copy {
+      position: relative;
+      z-index: 1;
+      width: 43%;
+      color: #030303;
+    }
+
+    .loading-kicker {
+      margin: 0 0 2%;
+      color: #062679;
+      font-size: clamp(10px, 1.75vw, 15px);
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .loading-title {
+      max-width: 10em;
+      margin: 0;
+      font-size: clamp(22px, 4.2vw, 42px);
+      line-height: 1.04;
+      letter-spacing: -.035em;
+    }
+
+    .loading-message {
+      margin: 3% 0 8%;
+      color: #28404a;
+      font-size: clamp(12px, 2vw, 18px);
+      font-weight: 600;
+    }
+
+    .loading-track {
+      position: relative;
+      width: min(100%, 360px);
+      height: clamp(10px, 2vh, 14px);
+      overflow: hidden;
+      border: 2px solid #062679;
+      border-radius: 999px;
+      background: #fff;
+      box-shadow: 0 5px 14px #06267916;
+    }
+
+    .loading-progress {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #00ffc9, #00c9ff);
+      transform-origin: left center;
+      animation: load-route 2.2s cubic-bezier(.2, .75, .25, 1) both;
+    }
+
+    .completion-screen {
+      background:
+        radial-gradient(circle at 16% 15%, #00c9ff24 0 8%, transparent 8.5%),
+        radial-gradient(circle at 82% 80%, #ffd50032 0 11%, transparent 11.5%),
+        linear-gradient(120deg, #f5ffff 0%, #e8fbff 55%, #fff9de 100%);
+    }
+
+    .completion-screen::before,
+    .completion-screen::after {
+      content: "✦";
+      position: absolute;
+      color: #00bada;
+      font-size: 7cqw;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .completion-screen::before { left: 7%; top: 17%; }
+    .completion-screen::after { right: 8%; bottom: 14%; color: #f2bd22; font-size: 5cqw; }
+
+    .completion-layout {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4%;
+      padding: 6% 9%;
+    }
+
+    .completion-character {
+      position: relative;
+      width: 30%;
+      height: 82%;
+      flex: 0 0 auto;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .completion-character::after {
+      content: "";
+      position: absolute;
+      left: 25%;
+      bottom: 2%;
+      width: 50%;
+      height: 5%;
+      border-radius: 50%;
+      background: #163f3930;
+      filter: blur(3px);
+    }
+
+    .completion-momo {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center bottom;
+      animation: finish-bounce 1.35s ease-in-out infinite;
+      filter: drop-shadow(0 3px 2px #0626791f);
+    }
+
+    .completion-copy {
+      position: relative;
+      z-index: 1;
+      width: 56%;
+      color: #030303;
+    }
+
+    .completion-kicker {
+      margin: 0 0 2.5%;
+      color: #062679;
+      font-size: 1.6cqw;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .completion-title {
+      margin: 0;
+      font-size: clamp(22px, 5.1cqw, 52px);
+      font-weight: 800;
+      line-height: 1.04;
+      letter-spacing: -.035em;
+    }
+
+    .completion-title span { color: #0055a7; }
+
+    .completion-message {
+      margin: 3% 0 6%;
+      color: #28404a;
+      font-size: clamp(12px, 2.1cqw, 19px);
+      font-weight: 600;
+    }
+
+    .completion-home {
+      min-height: 3.8cqw;
+      padding: .9cqw 2.1cqw;
+      border: .25cqw solid #00c9ff;
+      border-radius: 1.2cqw;
+      background: linear-gradient(120deg, #00ffc9, #00e5ed);
+      color: #030303;
+      font-size: clamp(12px, 2.15cqw, 20px);
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 3px 9px #06267920, inset 0 1px 0 #ffffffa8;
+      transition: filter .14s ease, transform .14s ease, box-shadow .14s ease;
+    }
+
+    .completion-home:hover { filter: brightness(1.04); box-shadow: 0 4px 12px #0626792b, inset 0 1px 0 #ffffffbf; }
+    .completion-home:active { transform: scale(.97); }
+    .completion-home:focus-visible { outline: 3px solid #ffcf55; outline-offset: 3px; }
+
+    .entry-art,
+    .slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .hit {
+      position: absolute;
+      z-index: 5;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      border-radius: 18px;
+      background: transparent;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .hit:focus-visible {
+      outline: 3px solid #ffcf55;
+      outline-offset: 3px;
+    }
+
+    .hit:active:not(:disabled) { transform: scale(.96); }
+    .hit:disabled { cursor: default; }
+    .nav-icon { display: block; width: 58%; height: 58%; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+    .home-icon { fill: currentColor; stroke: none; }
+
+    .intro-start {
+      left: 50.5%;
+      top: 64%;
+      width: 24.5%;
+      height: 13%;
+    }
+
+    .route-garden,
+    .route-shortest {
+      top: 23%;
+      width: 31%;
+      height: 70%;
+      border-radius: 34px;
+    }
+
+    .route-garden { left: 12.5%; }
+    .route-shortest { left: 56.7%; }
+
+    .short-start {
+      left: 50.3%;
+      top: 59.5%;
+      width: 24.5%;
+      height: 13%;
+    }
+
+    .short-intro-home {
+      right: 3%;
+      top: 5%;
+      width: 7%;
+      height: 17%;
+      border-radius: 12px;
+    }
+
+    .story-momo-wrap {
+      position: absolute;
+      z-index: 2;
+      left: var(--momo-x, 67%);
+      top: var(--momo-y, 35%);
+      width: var(--momo-w, 17%);
+      height: var(--momo-h, 61%);
+      pointer-events: none;
+      transform-origin: 50% 100%;
+    }
+
+    .story-momo-wrap[data-overlay="false"] { display: none; }
+    .story-momo-wrap[data-fit="target"] .story-shadow { display: none; }
+
+    .instruction-override {
+      position: absolute;
+      z-index: 1;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      left: 6.87%;
+      top: 63.85%;
+      width: 30.33%;
+      height: 18.2%;
+      padding: 0 .95cqw;
+      border: .6cqw solid #00c9ff;
+      border-radius: 2.96cqw;
+      background: #00ffc9;
+      color: #030303;
+      font-size: 2.6cqw;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    .frame[data-story-page="-2"] .instruction-override { display: flex; }
+
+    .story-momo {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center bottom;
+      transform-origin: 50% 100%;
+      filter: drop-shadow(0 2px 1px #132c3028);
+    }
+
+    .story-momo-wrap[data-fit="target"] .story-momo { object-fit: fill; }
+
+    .story-shadow {
+      position: absolute;
+      z-index: 0;
+      left: 29%;
+      bottom: 2.5%;
+      width: 42%;
+      height: 5.5%;
+      border-radius: 50%;
+      background: #163f3930;
+      filter: blur(2px);
+      transform-origin: center;
+    }
+
+    .frame[data-motion="walk"] .story-momo {
+      animation: grounded-walk .8s ease-in-out infinite;
+    }
+
+    .frame[data-motion="walk"] .story-shadow {
+      animation: walk-shadow .8s ease-in-out infinite;
+    }
+
+    .frame[data-motion="idle"] .story-momo {
+      animation: idle-grounded 2.4s ease-in-out infinite;
+    }
+
+    .frame[data-motion="idle"] .story-shadow {
+      animation: idle-shadow 2.4s ease-in-out infinite;
+    }
+
+    .frame[data-motion="point-right"] .story-momo {
+      animation: point-right 1.8s ease-in-out infinite;
+    }
+
+    .frame[data-motion="point-left"] .story-momo {
+      animation: point-left 1.8s ease-in-out infinite;
+    }
+
+    .frame[data-motion="climb"] .story-momo {
+      animation: climb-up 1s ease-in-out infinite;
+    }
+
+    .frame[data-motion="climb"] .story-shadow {
+      animation: walk-shadow 1s ease-in-out infinite;
+    }
+
+    .frame[data-motion="climb-left"] .story-momo {
+      animation: climb-up-left 1s ease-in-out infinite;
+    }
+
+    .frame[data-motion="climb-left"] .story-shadow {
+      animation: walk-shadow 1s ease-in-out infinite;
+    }
+
+    .frame[data-motion="escalator-climb"] .story-momo-wrap {
+      animation: escalator-path 3.2s cubic-bezier(.28, .12, .55, 1) forwards;
+    }
+
+    .frame[data-motion="escalator-climb"] .story-momo {
+      animation: escalator-footfalls .8s ease-in-out 4;
+    }
+
+    .frame[data-motion="escalator-climb"] .story-shadow {
+      animation: escalator-shadow 3.2s ease-in-out forwards;
+    }
+
+    .frame[data-motion="tap"] .story-momo {
+      animation: tap-action .5s cubic-bezier(.2, .75, .25, 1) both;
+    }
+
+    .frame[data-motion="success"] .story-momo {
+      animation: success-action .62s ease-out both;
+    }
+
+    .frame[data-motion="arrival"] .story-momo {
+      animation: arrival-action 1s ease-in-out infinite;
+    }
+
+    .frame[data-motion="transition"] .story-momo {
+      animation: step-out .35s ease-in both;
+    }
+
+    .home {
+      right: 3.2%;
+      top: 6.2%;
+      width: 5.7%;
+      height: 12.3%;
+      border-radius: 11px;
+    }
+
+    .back {
+      left: 3.2%;
+      bottom: 6.5%;
+      width: 5.7%;
+      height: 12.3%;
+      border-radius: 11px;
+    }
+
+    .next {
+      right: 3.2%;
+      bottom: 6.5%;
+      width: 5.7%;
+      height: 12.3%;
+      border-radius: 11px;
+    }
+
+    .story .home,
+    .story .back,
+    .story .next {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #00151f66;
+      background: linear-gradient(135deg, #00ffff 0%, #00d9ff 100%);
+      color: #050505;
+      box-shadow: 0 2px 7px #00151f30, inset 0 1px 0 #ffffffa8;
+      transition: transform .14s ease, filter .14s ease, box-shadow .14s ease;
+    }
+
+    .story .home:hover:not(:disabled),
+    .story .back:hover:not(:disabled),
+    .story .next:hover:not(:disabled) {
+      filter: brightness(1.04);
+      box-shadow: 0 3px 9px #00151f45, inset 0 1px 0 #ffffffbf;
+    }
+
+    .story .home:active:not(:disabled),
+    .story .back:active:not(:disabled),
+    .story .next:active:not(:disabled) { transform: scale(.94); }
+
+    .story .home:focus-visible,
+    .story .back:focus-visible,
+    .story .next:focus-visible { outline: 3px solid #050505; outline-offset: 3px; }
+
+    .story .home:disabled,
+    .story .back:disabled,
+    .story .next:disabled { opacity: .68; }
+
+    .route-progress {
+      position: absolute;
+      z-index: 4;
+      top: 4.2%;
+      left: 19%;
+      width: 62%;
+      height: 3.2%;
+      min-height: 5px;
+      padding: 2px;
+      overflow: hidden;
+      border: 1px solid #ffffffb8;
+      border-radius: 999px;
+      background: #10233355;
+      box-shadow: 0 1px 5px #10233335;
+      pointer-events: none;
+    }
+
+    .route-progress-fill {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #00c9ff, #00ffff);
+      box-shadow: 0 0 7px #00ffff99;
+      transition: width .45s cubic-bezier(.2, .75, .25, 1);
+    }
+
+    .success {
+      position: absolute;
+      z-index: 3;
+      display: none;
+      left: 56.2%;
+      top: 71%;
+      width: 4.8%;
+      aspect-ratio: 1;
+      place-items: center;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      background: #16ad69;
+      color: #fff;
+      font-size: clamp(13px, 2.2vw, 22px);
+      font-weight: 900;
+      box-shadow: 0 0 0 0 #22d98b88;
+    }
+
+    .success[data-on="true"] {
+      display: grid;
+      animation: success-pulse .62s ease-out both;
+    }
+
+    .sr {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    @keyframes grounded-walk {
+      0%, 50%, 100% { transform: translate(0, 0) rotate(-.8deg) scale(1); }
+      25% { transform: translate(1.5%, -3.5%) rotate(1.3deg) scale(.985, 1.025); }
+      75% { transform: translate(-1.5%, -3.5%) rotate(-1.3deg) scale(.985, 1.025); }
+    }
+
+    @keyframes walk-shadow {
+      0%, 50%, 100% { transform: scaleX(1); opacity: .52; }
+      25%, 75% { transform: scaleX(.78); opacity: .31; }
+    }
+
+    @keyframes idle-grounded {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.008, .992); }
+    }
+
+    @keyframes idle-shadow {
+      0%, 100% { transform: scaleX(1); opacity: .44; }
+      50% { transform: scaleX(1.02); opacity: .4; }
+    }
+
+    @keyframes point-right {
+      0%, 100% { transform: translateX(0) rotate(0) scaleX(-1); }
+      38% { transform: translateX(-1.2%) rotate(1.5deg) scaleX(-1.015); }
+      72% { transform: translateX(-.6%) rotate(.5deg) scaleX(-1.005); }
+    }
+
+    @keyframes point-left {
+      0%, 100% { transform: translateX(0) rotate(0) scale(1); }
+      38% { transform: translateX(1.2%) rotate(-1.5deg) scale(1.015); }
+      72% { transform: translateX(.6%) rotate(-.5deg) scale(1.005); }
+    }
+
+    @keyframes climb-up {
+      0%, 100% { transform: translateY(0) rotate(0) scale(-1, .99); }
+      32% { transform: translateY(-3.5%) rotate(2.5deg) scale(-.985, 1.025); }
+      64% { transform: translateY(-1%) rotate(1deg) scale(-1.01, .99); }
+    }
+
+    @keyframes climb-up-left {
+      0%, 100% { transform: translateY(0) rotate(0) scale(1, .99); }
+      32% { transform: translateY(-3.5%) rotate(-2.5deg) scale(.985, 1.025); }
+      64% { transform: translateY(-1%) rotate(-1deg) scale(1.01, .99); }
+    }
+
+    @keyframes escalator-path {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(8%, -5%); }
+      50% { transform: translate(18%, -12%); }
+      75% { transform: translate(32%, -19%); }
+      100% { transform: translate(45%, -25%); }
+    }
+
+    @keyframes escalator-footfalls {
+      0%, 100% { transform: translateY(0) rotate(0) scale(1, .99); }
+      35% { transform: translateY(-2%) rotate(1deg) scale(1.015, 1.01); }
+      70% { transform: translateY(0) rotate(-.5deg) scale(.99, 1.015); }
+    }
+
+    @keyframes escalator-shadow {
+      0%, 100% { transform: scaleX(1); opacity: .44; }
+      100% { transform: scaleX(.78); opacity: .28; }
+    }
+
+    @keyframes tap-action {
+      0% { transform: translate(0, 0) rotate(0) scale(1); }
+      55% { transform: translate(-5%, -1%) rotate(-3deg) scale(1.04); }
+      100% { transform: translate(-3%, 0) rotate(-1deg) scale(1.02); }
+    }
+
+    @keyframes success-action {
+      0% { transform: translate(-3%, 0) scale(1.02); }
+      30% { transform: translate(-3%, 1%) scale(1.07, .94); }
+      60% { transform: translate(-3%, -5%) scale(.98, 1.06); }
+      100% { transform: translate(0, 0) scale(1); }
+    }
+
+    @keyframes arrival-action {
+      0%, 100% { transform: rotate(0); }
+      25% { transform: rotate(-3deg); }
+      55% { transform: rotate(3deg); }
+      78% { transform: rotate(-2deg); }
+    }
+
+    @keyframes finish-bounce {
+      0%, 100% { transform: translateY(0) scale(1); }
+      45% { transform: translateY(-2.5%) scale(1.015, .99); }
+      70% { transform: translateY(0) scale(.99, 1.015); }
+    }
+
+    @keyframes step-out {
+      to { transform: translateX(9%); opacity: 0; }
+    }
+
+    @keyframes success-pulse {
+      0% { opacity: 0; transform: scale(.45); box-shadow: 0 0 0 0 #22d98baa; }
+      45% { opacity: 1; transform: scale(1.12); box-shadow: 0 0 0 12px #22d98b44; }
+      100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 24px #22d98b00; }
+    }
+
+    @keyframes load-route {
+      0% { transform: scaleX(0); }
+      18% { transform: scaleX(.14); }
+      64% { transform: scaleX(.73); }
+      100% { transform: scaleX(1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="frame" id="frame" data-view="loading" data-motion="idle" aria-label="MOMO wayfinding social story">
+    <section class="entry loading-screen" aria-label="Loading the wayfinding app">
+      <div class="loading-layout">
+        <div class="loading-character" aria-hidden="true">
+          <span class="loading-shadow"></span>
+          <img class="loading-momo" src="assets/momo-original.png" alt="">
+        </div>
+        <div class="loading-copy">
+          <p class="loading-kicker">MOMO Wayfinding</p>
+          <h1 class="loading-title">Getting your route ready</h1>
+          <p class="loading-message">MOMO is finding the clearest way.</p>
+          <div class="loading-track" role="progressbar" aria-label="Loading" aria-valuemin="0" aria-valuemax="100">
+            <span class="loading-progress"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="entry intro" aria-label="Meet MOMO">
+      <img class="entry-art" src="assets/source-home.png" alt="Hi, I’m Momo! I will be your guide for today.">
+      <button class="hit intro-start" id="introStart" type="button" aria-label="Let’s start"></button>
+    </section>
+
+    <section class="entry routes" aria-label="Route selection">
+      <img class="entry-art" src="assets/source-routes.png" alt="What would you like to explore today?">
+      <button class="hit route-garden" id="gardenRoute" type="button" aria-label="Garden Route"></button>
+      <button class="hit route-shortest" id="shortestRoute" type="button" aria-label="Shortest Route"></button>
+    </section>
+
+    <section class="entry short-intro" aria-label="Shortest Route introduction">
+      <img class="entry-art" src="assets/short-intro.png" alt="Fewer steps, shortest trip. The fastest way to get there!">
+      <button class="hit short-start" id="shortStart" type="button" aria-label="Start the Shortest Route"></button>
+      <button class="hit short-intro-home" id="shortIntroHome" type="button" aria-label="Return to route selection"></button>
+    </section>
+
+    <section class="entry completion-screen" aria-label="Route complete">
+      <div class="completion-layout">
+        <div class="completion-character" aria-hidden="true">
+          <img class="completion-momo" src="assets/momo-page25-figma.png" alt="">
+        </div>
+        <div class="completion-copy">
+          <p class="completion-kicker">Route complete</p>
+          <h1 class="completion-title">Congratulations,<br><span>you did it!</span></h1>
+          <p class="completion-message" id="completionMessage">You made it all the way.</p>
+          <button class="completion-home" id="completionHome" type="button">Back to Home</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="story" id="story" aria-label="Wayfinding story">
+      <img class="slide" id="slide" src="assets/garden--2-clean.png" alt="Wayfinding social story slide">
+      <div class="instruction-override" aria-label="From the star, walk to the escalator">
+        <span>From the <strong>star</strong>, <strong>walk</strong> to the <strong>escalator</strong></span>
+      </div>
+      <div class="story-momo-wrap" id="momoWrap" data-overlay="true">
+        <span class="story-shadow"></span>
+        <img class="story-momo" id="momo" src="assets/momo-original.png" alt="" aria-hidden="true">
+      </div>
+      <div class="route-progress" id="routeProgress" role="progressbar" aria-label="Garden Route progress" aria-valuemin="1" aria-valuemax="21" aria-valuenow="1" aria-valuetext="Step 1 of 21"><span class="route-progress-fill" id="routeProgressFill"></span></div>
+      <span class="success" id="success" aria-hidden="true">✓</span>
+      <button class="hit home" id="home" type="button" aria-label="Return to route selection"><svg class="nav-icon home-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.7 1.7 10.9l1.2 1.5L5 10.7V21h5.3v-6h3.4v6H19V10.7l2.1 1.7 1.2-1.5L12 2.7Z"/></svg></button>
+      <button class="hit back" id="back" type="button" aria-label="Previous story step"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg></button>
+      <button class="hit next" id="next" type="button" aria-label="Next story step"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-7-7 7 7-7 7"/></svg></button>
+    </section>
+
+    <p class="sr" id="status" role="status" aria-live="polite"></p>
+  </main>
+
+  <script>
+    const gardenSteps = [
+      { page: "-2", file: "garden--2-clean.png", instruction: "From the star, walk to the escalator", x: 57.5, y: 9.7, w: 24.9, h: 64.6, overlay: true },
+      { page: "-1", file: "garden--1.png", instruction: "Go up the escalator", momoBox: { x: 137, y: 220, w: 149, h: 145 }, momoAsset: "momo-escalator-figma.png", momoSource: { w: 804, h: 885, x: 80, y: 136, bw: 694, bh: 638 }, momoAnimation: "escalator", overlay: true },
+      { page: "0", file: "garden-0.png", instruction: "Turn right to the gantry", x: 68, y: 36, w: 17, h: 59, overlay: true },
+      { page: "1", file: "garden-1.png", instruction: "Tap card to exit", x: 60, y: 34, w: 19, h: 62, overlay: true, requiresTap: true },
+      { page: "2", file: "garden-2.png", instruction: "Look for the way out signboard", x: 13, y: 42, w: 19, h: 54, overlay: true },
+      { page: "3", file: "garden-3-clean.png", instruction: "Walk to the lift and take the lift up to Level 1", momoBox: { x: 108, y: 235, w: 141, h: 114 }, overlay: true },
+      { page: "5", file: "garden-5-clean.png", instruction: "Exit the lift and turn left to the zebra crossing", momoBox: { x: 178, y: 191, w: 134, h: 107 }, overlay: true },
+      { page: "7", file: "garden-7-clean.png", instruction: "You should see the zebra crossing", momoBox: { x: 128, y: 231, w: 127, h: 130 }, momoAsset: "momo-page7-figma.png", momoSource: { w: 894, h: 885, x: 130, y: 141, bw: 650, bh: 658 }, overlay: true },
+      { page: "8", file: "garden-8-clean.png", instruction: "Look out for vehicles before crossing", momoBox: { x: 246, y: 185, w: 96, h: 76 }, overlay: true },
+      { page: "9", file: "garden-9-clean.png", instruction: "Walk past the vending machine", momoBox: { x: 602, y: 192, w: 126, h: 115 }, momoAsset: "momo-page9-figma.png", momoSource: { w: 734, h: 886, x: 107, y: 195, bw: 570, bh: 542 }, flipX: true, overlay: true },
+      { page: "10", file: "garden-10-clean.png", instruction: "You should see Oldham Lane", momoBox: { x: 580, y: 206, w: 98, h: 112 }, momoAsset: "momo-page10-figma.png", momoSource: { w: 767, h: 886, x: 73, y: 65, bw: 658, bh: 758 }, overlay: true },
+      { page: "11", file: "garden-11-clean.png", instruction: "Look out for traffic before crossing", overlay: false },
+      { page: "12", file: "garden-12-clean.png", instruction: "Carefully cross the road", momoBox: { x: 423, y: 155, w: 107, h: 103 }, momoAsset: "momo-page12-figma.png", momoSource: { w: 734, h: 886, x: 107, y: 195, bw: 569, bh: 541 }, flipX: true, overlay: true },
+      { page: "13", file: "garden-13-clean.png", instruction: "Follow the pavement", momoBox: { x: 633, y: 215, w: 132, h: 104 }, overlay: true },
+      { page: "16", file: "garden-16-clean.png", instruction: "Continue to follow the path", momoBox: { x: 617, y: 208, w: 119, h: 94 }, overlay: true },
+      { page: "17", file: "garden-17-clean.png", instruction: "Go down the slope carefully", momoBox: { x: 540, y: 256, w: 150, h: 118 }, overlay: true },
+      { page: "18", file: "garden-18-clean.png", instruction: "You should see a coloured pathway and an exit on the right", momoBox: { x: 360, y: 141, w: 95, h: 76 }, overlay: true },
+      { page: "20", file: "garden-20-clean.png", instruction: "You should see a door", momoBox: { x: 143, y: 192, w: 139, h: 164 }, momoAsset: "momo-page10-figma.png", momoSource: { w: 767, h: 886, x: 73, y: 65, bw: 658, bh: 758 }, overlay: true },
+      { page: "21", file: "garden-21-clean.png", instruction: "Pull open the door", momoBox: { x: 125, y: 194, w: 184, h: 177 }, momoAsset: "momo-page9-figma.png", momoSource: { w: 734, h: 886, x: 107, y: 195, bw: 569, bh: 541 }, flipX: true, overlay: true },
+      { page: "22", file: "garden-22-clean.png", instruction: "Look for the directions to Banyan Cove", momoBox: { x: 99, y: 240, w: 164, h: 130 }, overlay: true },
+      { page: "25", file: "garden-25-clean.png", instruction: "You have arrived at the exhibition venue", momoBox: { x: 572, y: 203, w: 130, h: 156 }, momoAsset: "momo-page25-figma.png", momoSource: { w: 864, h: 885, x: 129, y: 83, bw: 608, bh: 741 }, overlay: true }
+    ];
+
+    const MOMO_ANIMATIONS = Object.freeze({
+      walk: { name: "walk", asset: "momo-idle.svg", source: { w: 238, h: 285, x: 37, y: 86, bw: 176, bh: 150 } },
+      pointRight: { name: "point-right", asset: "momo-idle.svg", flipX: true, source: { w: 238, h: 285, x: 37, y: 86, bw: 176, bh: 150 } },
+      climb: { name: "climb", asset: "momo-idle.svg", flipX: true, source: { w: 238, h: 285, x: 37, y: 86, bw: 176, bh: 150 } },
+      climbLeft: { name: "climb-left", asset: "momo-idle.svg", source: { w: 238, h: 285, x: 37, y: 86, bw: 176, bh: 150 } },
+      escalator: { name: "escalator-climb", asset: "momo-escalator-figma.png", source: { w: 804, h: 885, x: 80, y: 136, bw: 694, bh: 638 } },
+      pointLeft: { name: "point-left", asset: "momo-idle.svg", source: { w: 238, h: 285, x: 37, y: 86, bw: 176, bh: 150 } },
+      tap: { name: "tap", asset: "momo-idle.svg", source: { w: 238, h: 285, x: 37, y: 86, bw: 176, bh: 150 } },
+      idle: { name: "idle", asset: "momo-idle.svg", source: { w: 238, h: 285, x: 37, y: 86, bw: 176, bh: 150 } },
+      arrival: { name: "arrival", asset: "momo-idle.svg", source: { w: 238, h: 285, x: 37, y: 86, bw: 176, bh: 150 } }
+    });
+
+    const INSTRUCTION_ANIMATION_RULES = [
+      { pattern: /\barriv(?:e|ed|al)\b/i, animation: "arrival" },
+      { pattern: /\btap\b.*\bcard\b|\bcard\b.*\btap\b/i, animation: "tap" },
+      { pattern: /\blift\b.*\bup\b|\bup\b.*\blift\b/i, animation: "climbLeft" },
+      { pattern: /\b(?:go|head|move|take|ride|walk)\s+up\b|\bup\s+(?:the\s+)?(?:escalator|stairs?)\b|\b(?:escalator|stairs?)\b.*\bup\b/i, animation: "climb" },
+      { pattern: /\bturn\s+right\b.*\bgantry\b|\bgantry\b.*\bturn\s+right\b/i, animation: "pointLeft" },
+      { pattern: /\bturn\s+left\b/i, animation: "pointLeft" },
+      { pattern: /\bturn\s+right\b|\bright\b|\bpoint(?:ing)?\b|\bsignboard\b|\bdirections?\b/i, animation: "pointRight" },
+      { pattern: /\b(?:look\s+out|watch\s+for|wait|stop)\b|\btraffic\b|\bvehicles?\b/i, animation: "idle" },
+      { pattern: /\bwalk\b|\bwalking\b|\bstraight\b|\bforward\b|\bfollow\b|\bpavement\b|\bcross(?:ing)?\b|\bexit\s+the\s+lift\b|\bcontinue\b|\bdown\s+the\s+slope\b/i, animation: "walk" }
+    ];
+
+    function getMomoAnimation(slideText) {
+      const text = String(slideText || "").trim();
+      const rule = INSTRUCTION_ANIMATION_RULES.find(({ pattern }) => pattern.test(text));
+      return MOMO_ANIMATIONS[rule?.animation || "idle"];
+    }
+
+    const shortestSteps = [
+      { page: "1", file: "short-01.png" },
+      { page: "2", file: "short-02.png" },
+      { page: "3", file: "short-03.png" },
+      { page: "4", file: "short-04.png" },
+      { page: "5", file: "short-05.png" },
+      { page: "6", file: "short-06.png" },
+      { page: "7", file: "short-07.png" },
+      { page: "8", file: "short-08.png" },
+      { page: "9", file: "short-09.png" },
+      { page: "11", file: "short-11.png" },
+      { page: "12", file: "short-12.png" },
+      { page: "13", file: "short-13.png" },
+      { page: "14", file: "short-14.png" },
+      { page: "15", file: "short-15.png" },
+      { page: "16", file: "short-16.png" },
+      { page: "17", file: "short-17.png" }
+    ];
+
+    const frame = document.querySelector("#frame");
+    const story = document.querySelector("#story");
+    const slide = document.querySelector("#slide");
+    const momo = document.querySelector("#momo");
+    const momoWrap = document.querySelector("#momoWrap");
+    const success = document.querySelector("#success");
+    const status = document.querySelector("#status");
+    const completionMessage = document.querySelector("#completionMessage");
+    const progress = document.querySelector("#routeProgress");
+    const progressFill = document.querySelector("#routeProgressFill");
+    const backButton = document.querySelector("#back");
+    const nextButton = document.querySelector("#next");
+
+    let route = "garden";
+    let index = 0;
+    let busy = false;
+    let tapped = false;
+    let autoTapTimer = 0;
+    let tapStarted = false;
+
+    function wait(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function activeSteps() {
+      return route === "garden" ? gardenSteps : shortestSteps;
+    }
+
+    function showIntro() {
+      frame.dataset.view = "intro";
+      frame.dataset.motion = "idle";
+      status.textContent = "Meet MOMO";
+    }
+
+    function showRoutes() {
+      clearTimeout(autoTapTimer);
+      busy = false;
+      frame.dataset.view = "routes";
+      frame.dataset.motion = "idle";
+      status.textContent = "Route selection";
+    }
+
+    function showCompletion() {
+      clearTimeout(autoTapTimer);
+      busy = false;
+      frame.dataset.view = "completion";
+      frame.dataset.motion = "arrival";
+      completionMessage.textContent = `You completed the ${route === "garden" ? "Garden" : "Shortest"} Route. Great work!`;
+      status.textContent = "Congratulations, you completed the route.";
+    }
+
+    function showShortestIntro() {
+      busy = false;
+      frame.dataset.view = "short-intro";
+      frame.dataset.motion = "idle";
+      status.textContent = "Shortest Route introduction";
+    }
+
+    function openStory(selectedRoute) {
+      clearTimeout(autoTapTimer);
+      route = selectedRoute;
+      index = 0;
+      tapped = false;
+      tapStarted = false;
+      busy = false;
+      frame.dataset.view = "story";
+      story.setAttribute("aria-label", route === "garden" ? "Garden Route" : "Shortest Route");
+      render();
+    }
+
+    function render() {
+      const steps = activeSteps();
+      const step = steps[index];
+      const isGarden = route === "garden";
+      const stepNumber = index + 1;
+      const animation = isGarden ? MOMO_ANIMATIONS[step.momoAnimation] || getMomoAnimation(step.instruction) : MOMO_ANIMATIONS.idle;
+
+      frame.dataset.storyPage = step.page;
+      slide.src = "assets/" + step.file;
+      slide.alt = (isGarden ? "Garden Route" : "Shortest Route") + " social story slide";
+      const momoAsset = step.momoAsset || animation.asset;
+      const momoSource = step.momoSource || animation.source;
+      momo.src = "assets/" + momoAsset;
+
+      if (step.momoBox && momoSource) {
+        const target = step.momoBox;
+        const source = momoSource;
+        const frameScaleX = frame.clientWidth / 844;
+        const frameScaleY = frame.clientHeight / 390;
+        const flipX = step.flipX ?? animation.flipX;
+        const visibleSourceX = flipX ? source.w - source.x - source.bw : source.x;
+        const imageWidth = target.w * frameScaleX * source.w / source.bw;
+        const imageHeight = target.h * frameScaleY * source.h / source.bh;
+        const left = target.x * frameScaleX - visibleSourceX * imageWidth / source.w;
+        const top = target.y * frameScaleY - source.y * imageHeight / source.h;
+        momoWrap.style.setProperty("--momo-x", `${left / frame.clientWidth * 100}%`);
+        momoWrap.style.setProperty("--momo-y", `${top / frame.clientHeight * 100}%`);
+        momoWrap.style.setProperty("--momo-w", `${imageWidth / frame.clientWidth * 100}%`);
+        momoWrap.style.setProperty("--momo-h", `${imageHeight / frame.clientHeight * 100}%`);
+        momoWrap.dataset.fit = "target";
+      } else {
+        momoWrap.style.setProperty("--momo-x", (step.x ?? 0) + "%");
+        momoWrap.style.setProperty("--momo-y", (step.y ?? 0) + "%");
+        momoWrap.style.setProperty("--momo-w", (step.w ?? 0) + "%");
+        momoWrap.style.setProperty("--momo-h", (step.h ?? 0) + "%");
+        momoWrap.dataset.fit = "contain";
+      }
+      momoWrap.dataset.overlay = String(Boolean(isGarden && step.overlay));
+      momoWrap.style.transform = step.flipX ? "scaleX(-1)" : "";
+      momoWrap.dataset.animation = animation.name;
+      frame.dataset.motion = animation.name;
+
+      progress.setAttribute("aria-label", `${isGarden ? "Garden" : "Shortest"} Route progress`);
+      progress.setAttribute("aria-valuemax", String(steps.length));
+      progress.setAttribute("aria-valuenow", String(stepNumber));
+      progress.setAttribute("aria-valuetext", `Step ${stepNumber} of ${steps.length}`);
+      progressFill.style.width = `${(stepNumber / steps.length) * 100}%`;
+      success.dataset.on = String(Boolean(isGarden && step.requiresTap && tapped));
+      backButton.disabled = index === 0;
+      nextButton.disabled = busy || Boolean(isGarden && step.requiresTap && !tapped);
+      nextButton.setAttribute("aria-label", index === steps.length - 1 ? "Finish route" : "Next story step");
+
+      frame.dataset.route = route;
+      frame.dataset.step = step.page;
+      frame.dataset.index = String(index);
+      status.textContent =
+        (isGarden ? "Garden Route" : "Shortest Route") +
+        " story step " + stepNumber + " of " + steps.length;
+
+      if (isGarden && step.requiresTap && !tapStarted && !tapped && !busy) {
+        tapStarted = true;
+        clearTimeout(autoTapTimer);
+        autoTapTimer = window.setTimeout(playCardTap, 280);
+      }
+    }
+
+    async function nextStep() {
+      const steps = activeSteps();
+      const step = steps[index];
+      if (busy || (route === "garden" && step.requiresTap && !tapped)) return;
+      if (index === steps.length - 1) {
+        showCompletion();
+        return;
+      }
+
+      busy = true;
+      if (route === "garden") frame.dataset.motion = "transition";
+      await wait(route === "garden" && step.overlay ? 350 : 120);
+      index++;
+      tapped = false;
+      tapStarted = false;
+      busy = false;
+      render();
+    }
+
+    function previousStep() {
+      if (busy || index === 0) return;
+      clearTimeout(autoTapTimer);
+      index--;
+      tapped = false;
+      tapStarted = false;
+      render();
+    }
+
+    async function playCardTap() {
+      const step = activeSteps()[index];
+      if (route !== "garden" || busy || !step.requiresTap || tapped) return;
+
+      busy = true;
+      frame.dataset.motion = "tap";
+      status.textContent = "MOMO is tapping the card.";
+      await wait(480);
+      frame.dataset.motion = "success";
+      success.dataset.on = "true";
+      tapped = true;
+      await wait(620);
+      busy = false;
+      nextButton.disabled = index === activeSteps().length - 1;
+      status.textContent = "Card tap complete";
+    }
+
+    document.querySelector("#introStart").addEventListener("click", showRoutes);
+    document.querySelector("#gardenRoute").addEventListener("click", () => openStory("garden"));
+    document.querySelector("#shortestRoute").addEventListener("click", showShortestIntro);
+    document.querySelector("#shortStart").addEventListener("click", () => openStory("shortest"));
+    document.querySelector("#shortIntroHome").addEventListener("click", showRoutes);
+    document.querySelector("#completionHome").addEventListener("click", showRoutes);
+    document.querySelector("#home").addEventListener("click", showRoutes);
+    backButton.addEventListener("click", previousStep);
+    nextButton.addEventListener("click", nextStep);
+
+    document.addEventListener("keydown", event => {
+      if (frame.dataset.view === "story") {
+        if (event.key === "ArrowRight") nextStep();
+        if (event.key === "ArrowLeft") previousStep();
+        if (event.key === "Escape") showRoutes();
+      } else if (event.key === "Escape" && frame.dataset.view === "short-intro") {
+        showRoutes();
+      }
+    });
+
+    window.__wayfinding = {
+      showIntro,
+      showRoutes,
+      showShortestIntro,
+      openStory,
+      nextStep,
+      previousStep,
+      getState: () => ({
+        view: frame.dataset.view,
+        route,
+        index,
+        step: activeSteps()[index]?.page,
+        motion: frame.dataset.motion,
+        animation: momoWrap.dataset.animation || "idle",
+        tapped,
+        nextDisabled: nextButton.disabled,
+        progress: `${index + 1} of ${activeSteps().length}`
+      })
+    };
+
+    window.__gardenRoute = window.__wayfinding;
+    window.setTimeout(showIntro, 2200);
+  </script>
+</body>
+</html>
