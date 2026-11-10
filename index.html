@@ -378,8 +378,8 @@
       align-items: center;
       justify-content: center;
       left: 6.87%;
-      top: 63.85%;
-      width: 30.33%;
+      top: 12.5%;
+      right: 24%;
       height: 18.2%;
       padding: 0 .95cqw;
       border: .6cqw solid #00c9ff;
@@ -556,24 +556,31 @@
       width: 62%;
       height: 3.2%;
       min-height: 5px;
-      padding: 2px;
-      overflow: hidden;
-      border: 1px solid #ffffffb8;
-      border-radius: 999px;
-      background: #10233355;
-      box-shadow: 0 1px 5px #10233335;
+      display: flex;
+      gap: 4px;
+      overflow: visible;
       pointer-events: none;
     }
 
-    .route-progress-fill {
+    .route-progress-segment {
       display: block;
-      width: 0;
+      flex: 1 1 0;
+      min-width: 0;
       height: 100%;
       border-radius: 999px;
-      background: linear-gradient(90deg, #00c9ff, #00ffff);
-      box-shadow: 0 0 7px #00ffff99;
-      transition: width .45s cubic-bezier(.2, .75, .25, 1);
+      border: 1px solid #ffffffb8;
+      background: #10233370;
+      box-shadow: 0 1px 4px #10233330;
+      transition: background .25s ease, box-shadow .25s ease;
     }
+
+    .route-progress-segment[data-state="complete"],
+    .route-progress-segment[data-state="active"] {
+      background: linear-gradient(90deg, #00c9ff, #00ffff);
+      border-color: #ffffffd4;
+    }
+
+    .route-progress-segment[data-state="active"] { box-shadow: 0 0 7px #00ffff99; }
 
     .success {
       position: absolute;
@@ -785,7 +792,7 @@
         <span class="story-shadow"></span>
         <img class="story-momo" id="momo" src="assets/momo-original.png" alt="" aria-hidden="true">
       </div>
-      <div class="route-progress" id="routeProgress" role="progressbar" aria-label="Garden Route progress" aria-valuemin="1" aria-valuemax="21" aria-valuenow="1" aria-valuetext="Step 1 of 21"><span class="route-progress-fill" id="routeProgressFill"></span></div>
+      <div class="route-progress" id="routeProgress" role="progressbar" aria-label="Garden Route progress" aria-valuemin="1" aria-valuemax="21" aria-valuenow="1" aria-valuetext="Step 1 of 21"></div>
       <span class="success" id="success" aria-hidden="true">✓</span>
       <button class="hit home" id="home" type="button" aria-label="Return to route selection"><svg class="nav-icon home-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.7 1.7 10.9l1.2 1.5L5 10.7V21h5.3v-6h3.4v6H19V10.7l2.1 1.7 1.2-1.5L12 2.7Z"/></svg></button>
       <button class="hit back" id="back" type="button" aria-label="Previous story step"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg></button>
@@ -878,7 +885,7 @@
     const status = document.querySelector("#status");
     const completionMessage = document.querySelector("#completionMessage");
     const progress = document.querySelector("#routeProgress");
-    const progressFill = document.querySelector("#routeProgressFill");
+    let progressSegments = [];
     const backButton = document.querySelector("#back");
     const nextButton = document.querySelector("#next");
 
@@ -985,7 +992,20 @@
       progress.setAttribute("aria-valuemax", String(steps.length));
       progress.setAttribute("aria-valuenow", String(stepNumber));
       progress.setAttribute("aria-valuetext", `Step ${stepNumber} of ${steps.length}`);
-      progressFill.style.width = `${(stepNumber / steps.length) * 100}%`;
+      if (progressSegments.length !== steps.length) {
+        const fragment = document.createDocumentFragment();
+        progressSegments = Array.from({ length: steps.length }, () => {
+          const segment = document.createElement("span");
+          segment.className = "route-progress-segment";
+          segment.setAttribute("aria-hidden", "true");
+          fragment.append(segment);
+          return segment;
+        });
+        progress.replaceChildren(fragment);
+      }
+      progressSegments.forEach((segment, segmentIndex) => {
+        segment.dataset.state = segmentIndex === index ? "active" : segmentIndex < index ? "complete" : "inactive";
+      });
       success.dataset.on = String(Boolean(isGarden && step.requiresTap && tapped));
       backButton.disabled = index === 0;
       nextButton.disabled = busy || Boolean(isGarden && step.requiresTap && !tapped);
