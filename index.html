@@ -539,6 +539,11 @@
     .story .back:focus-visible,
     .story .next:focus-visible { outline: 3px solid #050505; outline-offset: 3px; }
 
+    /* Keep keyboard focus visible without the dark ring on the Banyan Cove slide. */
+    #frame[data-story-page="22"] .story .next:focus-visible {
+      outline-color: #00ffff;
+    }
+
     .story .home:disabled,
     .story .back:disabled,
     .story .next:disabled { opacity: .68; }
@@ -811,7 +816,7 @@
       { page: "18", file: "garden-18-clean.png", instruction: "You should see a coloured pathway and an exit on the right", momoBox: { x: 360, y: 141, w: 95, h: 76 }, overlay: true },
       { page: "20", file: "garden-20-clean.png", instruction: "You should see a door", momoBox: { x: 143, y: 192, w: 139, h: 164 }, momoAsset: "momo-page10-figma.png", momoSource: { w: 767, h: 886, x: 73, y: 65, bw: 658, bh: 758 }, overlay: true },
       { page: "21", file: "garden-21-clean.png", instruction: "Pull open the door", momoBox: { x: 125, y: 194, w: 184, h: 177 }, momoAsset: "momo-page9-figma.png", momoSource: { w: 734, h: 886, x: 107, y: 195, bw: 569, bh: 541 }, flipX: true, overlay: true },
-      { page: "22", file: "garden-22-clean.png", instruction: "Look for the directions to Banyan Cove", momoBox: { x: 99, y: 240, w: 164, h: 130 }, overlay: true },
+      { page: "22", file: "garden-22-clean.png", instruction: "Look for the directions to Banyan Cove", overlay: true },
       { page: "25", file: "garden-25-clean.png", instruction: "You have arrived at the exhibition venue", momoBox: { x: 572, y: 203, w: 130, h: 156 }, momoAsset: "momo-page25-figma.png", momoSource: { w: 864, h: 885, x: 129, y: 83, bw: 608, bh: 741 }, overlay: true }
     ];
 
