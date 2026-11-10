@@ -27,7 +27,7 @@
       width: min(100vw, 216.41vh);
       height: min(100vh, 46.21vw);
       aspect-ratio: 844 / 390;
-      overflow: visible;
+      overflow: hidden;
       transform: translate(-50%, -50%);
       background: #fff;
       isolation: isolate;
@@ -41,9 +41,6 @@
       display: none;
       overflow: hidden;
     }
-
-    /* The story tracker can sit in the letterbox above the slide artwork. */
-    .story { overflow: visible; }
 
     .frame[data-view="loading"] .loading-screen,
     .frame[data-view="intro"] .intro,
@@ -554,15 +551,23 @@
     .route-progress {
       position: absolute;
       z-index: 4;
-      top: calc(min(50vh, 23.105vw) - 50vh + max(12px, env(safe-area-inset-top)));
-      left: 19%;
-      width: 62%;
+      top: 4.2%;
+      left: 4.5%;
+      width: 44%;
       height: 3.2%;
       min-height: 5px;
       display: flex;
       gap: 4px;
       overflow: visible;
       pointer-events: none;
+    }
+
+    .route-progress[data-placement="bottom"] {
+      top: auto;
+      right: 19%;
+      bottom: 4.2%;
+      left: 19%;
+      width: 62%;
     }
 
     .route-progress-segment {
@@ -995,6 +1000,7 @@
       progress.setAttribute("aria-valuemax", String(steps.length));
       progress.setAttribute("aria-valuenow", String(stepNumber));
       progress.setAttribute("aria-valuetext", `Step ${stepNumber} of ${steps.length}`);
+      progress.dataset.placement = isGarden && step.page === "22" ? "bottom" : "top";
       if (progressSegments.length !== steps.length) {
         const fragment = document.createDocumentFragment();
         progressSegments = Array.from({ length: steps.length }, () => {
